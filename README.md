@@ -140,6 +140,22 @@ docker run -d --name unifi-u5g-monitor -p 8513:8513 \
 
 The container binds to `0.0.0.0:8513` internally (via the `U5G_HOST` env var) so `-p` port mapping works out of the box; this only affects the container's own listen address, not what you enter in Settings > Connection for the gateway/modem.
 
+### Automatic Docker updates (optional)
+
+The Docker image itself has no `.git` checkout, so it can't self-update — the in-app "Update now" button only works for non-Docker (git-based) installs. For Docker, use `scripts/auto-update-docker.sh`: it's a no-op when already up to date, and otherwise pulls and rebuilds in place (`git pull --ff-only && docker compose up -d --build`), logging to `logs/auto-update.log`.
+
+Schedule it periodically with cron (Linux/macOS):
+
+```bash
+crontab -e
+# check every 30 minutes
+*/30 * * * * /path/to/unifi-u5g-monitor/scripts/auto-update-docker.sh
+```
+
+Or with a systemd timer on Linux — create `/etc/systemd/system/u5g-monitor-update.service` and `.timer` units that run the script `OnCalendar=*:0/30`, then `systemctl enable --now u5g-monitor-update.timer`.
+
+This is opt-in and off by default — without it, you'll just get an in-app notification and update on your own schedule.
+
 ## Configuration and data
 
 - Runtime configuration: `config/settings.json` (git-ignored, generated on first run from `config/settings.example.json` defaults)

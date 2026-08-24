@@ -15,6 +15,7 @@ data/
 config/settings.json
 config/*.key
 config/*.pem
+.auto-update.lock
 
 # AI assistant helper/config files
 AGENTS.md

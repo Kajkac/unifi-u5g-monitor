@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.0 — 2026-08-25
+
+- Added `scripts/auto-update-docker.sh` for opt-in automatic Docker updates via cron/systemd timer — checks the git remote, and only pulls + rebuilds when a new commit is actually available.
+
 ## 0.2.1 — 2026-08-24
 
 - Fixed the "Update now" result showing as a duplicate toast (once from the direct response, once from the broadcast event).
