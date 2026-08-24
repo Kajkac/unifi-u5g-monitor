@@ -70,6 +70,8 @@ function readConfig(): AppConfig {
     next.auth.seededDefault = true;
   }
   writeFileSync(configPath, JSON.stringify(next, null, 2));
+  if (process.env.U5G_HOST) next.server.host = process.env.U5G_HOST;
+  if (process.env.U5G_PORT) next.server.port = Number(process.env.U5G_PORT);
   return next;
 }
 

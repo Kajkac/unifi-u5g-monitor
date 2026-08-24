@@ -104,6 +104,30 @@ Remove it with:
 npm run service:uninstall
 ```
 
+## Running with Docker
+
+The app also ships a `Dockerfile` and `docker-compose.yml` — this is the easiest way to run it if you don't want a local Node.js setup.
+
+```bash
+git clone https://github.com/<your-username>/unifi-u5g-monitor.git
+cd unifi-u5g-monitor
+docker compose up -d --build
+```
+
+Open `http://127.0.0.1:8513`. Configuration (`config/settings.json`) and the SQLite database (`data/`) are bind-mounted from the project directory, so they persist across container rebuilds/restarts.
+
+Without Compose:
+
+```bash
+docker build -t unifi-u5g-monitor .
+docker run -d --name unifi-u5g-monitor -p 8513:8513 \
+  -v "$(pwd)/config:/app/config" \
+  -v "$(pwd)/data:/app/data" \
+  unifi-u5g-monitor
+```
+
+The container binds to `0.0.0.0:8513` internally (via the `U5G_HOST` env var) so `-p` port mapping works out of the box; this only affects the container's own listen address, not what you enter in Settings > Connection for the gateway/modem.
+
 ## Configuration and data
 
 - Runtime configuration: `config/settings.json` (git-ignored, generated on first run from `config/settings.example.json` defaults)

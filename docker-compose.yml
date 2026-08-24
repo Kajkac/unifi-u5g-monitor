@@ -1,0 +1,11 @@
+services:
+  u5g-monitor:
+    build: .
+    image: unifi-u5g-monitor:local
+    container_name: unifi-u5g-monitor
+    restart: unless-stopped
+    ports:
+      - "8513:8513"
+    volumes:
+      - ./config:/app/config
+      - ./data:/app/data
