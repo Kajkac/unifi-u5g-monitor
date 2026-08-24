@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Activity, Antenna, ArrowDownUp, Bot, Clock3, Command, Database, Gauge, MessageSquare, Moon, RadioTower, RefreshCw, Settings, Signal, Sun, Terminal } from 'lucide-react'
 import { api, formatRelative, type EventRow, type Status, type TabId, type TrendPoint, useNow } from './lib'
 import { Login, useAuth } from './login'
+import { Setup } from './setup'
 import { OverviewView, SignalView, DataView, SystemView, DiagnosticsView, MqttView } from './views'
 import { SmsView } from './sms'
 import { AutomationsView } from './automations'
@@ -40,6 +41,7 @@ export default function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem('u5g-theme') || 'dark')
   const [toasts, setToasts] = useState<Array<{ id: number; tone: string; text: string }>>([])
   const [paletteOpen, setPaletteOpen] = useState(false)
+  const [skipSetup, setSkipSetup] = useState(false)
   const socketRef = useRef<WebSocket | null>(null)
   const toastId = useRef(0)
   const now = useNow()
@@ -108,6 +110,7 @@ export default function App() {
   })()
 
   if (!auth.auth) return <div className="boot-screen"><Activity className="spin" /> Loading…</div>
+  if (auth.needsLogin && auth.auth.seededDefault && !skipSetup) return <Setup onSuccess={auth.refresh} onSkip={() => setSkipSetup(true)} />
   if (auth.needsLogin) return <Login seededDefault={auth.auth.seededDefault} onSuccess={auth.refresh} />
 
   const groups = [...new Set(nav.map((item) => item.group))]

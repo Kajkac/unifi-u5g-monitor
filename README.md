@@ -65,9 +65,9 @@ npm run build
 npm run server
 ```
 
-Open `http://127.0.0.1:8513`. Default login is `admin` / `admin` — change it immediately under **Settings > Access**.
+Open `http://127.0.0.1:8513`. On first run you'll see a **setup screen** asking for your UniFi gateway IP, its SSH password, and a new admin password — fill it in and you're done. (You can skip it and use the default `admin` / `admin` login instead, but change that password before exposing the app to anything beyond localhost.)
 
-Then go to **Settings > Connection** and enter your gateway SSH details and the U5G modem's IP. The recommended **UniFi managed credentials** mode fetches the adopted U5G SSH credentials from the UniFi Network controller into memory only — the modem doesn't need to be directly reachable from the machine running this app.
+Then go to **Settings > Connection** to fine-tune the U5G modem's IP and credentials. The recommended **UniFi managed credentials** mode fetches the adopted U5G SSH credentials from the UniFi Network controller into memory only — the modem doesn't need to be directly reachable from the machine running this app.
 
 ## Running on macOS / Linux
 

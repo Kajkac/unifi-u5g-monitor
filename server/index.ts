@@ -128,7 +128,7 @@ app.addHook("onRequest", async (request, reply) => {
   const isApi = url.startsWith("/api/");
   const isWs = url === "/ws";
   if (!isApi && !isWs) return;
-  if (isApi && ["/api/login", "/api/auth", "/api/version"].includes(url)) return;
+  if (isApi && ["/api/login", "/api/auth", "/api/version", "/api/setup"].includes(url)) return;
   const active = session(request);
   if (!active) return reply.code(401).send({ error: "Authentication required" });
   if (isApi && !["GET", "HEAD"].includes(request.method.toUpperCase()) && active.role !== "admin") return reply.code(403).send({ error: "Admin required" });
@@ -164,6 +164,25 @@ app.post("/api/logout", async (request, reply) => {
 app.get("/api/auth", async (request) => {
   const active = session(request);
   return { enabled: config.auth.enabled, authenticated: Boolean(active), role: active?.role ?? null, seededDefault: config.auth.seededDefault };
+});
+
+const setupSchema = z.object({
+  gatewayHost: z.string().trim().min(1),
+  gatewayUser: z.string().trim().min(1).default("root"),
+  gatewayPassword: z.string().min(1),
+  adminPassword: z.string().min(4),
+});
+app.post("/api/setup", async (request, reply) => {
+  if (!config.auth.seededDefault) return reply.code(403).send({ error: "Setup already completed. Use Settings to change connection or password." });
+  const parsed = setupSchema.safeParse(request.body);
+  if (!parsed.success) return reply.code(400).send({ error: "Fill in the gateway host, its SSH password, and a new admin password (min 4 characters)." });
+  config.connection.gateway.host = parsed.data.gatewayHost;
+  config.connection.gateway.user = parsed.data.gatewayUser;
+  config.connection.gateway.password = parsed.data.gatewayPassword;
+  setPassword("admin", parsed.data.adminPassword);
+  saveConfig();
+  emitEvent({ ts: new Date().toISOString(), level: "action", kind: "settings", message: "Initial setup completed" });
+  return { ok: true };
 });
 
 app.get("/api/status", async () => currentStatus ?? { checkedAt: new Date().toISOString(), connected: false, connection: { gatewayHost: config.connection.gateway.host, modemHost: config.connection.modem.host, mode: "ssh-jump" }, sms: smsCounts() });
