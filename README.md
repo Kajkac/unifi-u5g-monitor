@@ -4,6 +4,14 @@ A private, self-hosted dashboard for the UniFi U5G family of mobile gateways (U5
 
 This is not affiliated with or endorsed by Ubiquiti/UniFi. It talks to your own hardware over SSH on your own network.
 
+<p align="center">
+  <img src="docs/screenshot-overview.png" width="600" alt="Overview dashboard" />
+  <img src="docs/screenshot-signal.png" width="600" alt="Signal history and carrier aggregation" />
+  <img src="docs/screenshot-data.png" width="600" alt="Data usage and WAN" />
+</p>
+
+*Identifying values (IPs, MAC, serial, carrier, location) are redacted in these screenshots; nothing like that is shown to other users of your own instance.*
+
 ## Supported hardware
 
 - UniFi U5G
