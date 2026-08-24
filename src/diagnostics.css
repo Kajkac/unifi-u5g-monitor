@@ -1,0 +1,14 @@
+.json-block.embedded { border: 0; border-radius: 0; border-top: 1px solid var(--line-soft); max-height: 280px; }
+.raw-dump { max-height: 720px; line-height: 1.55; }
+.subhead { margin: 0; padding: 10px 16px 7px; color: var(--muted); font-size: 9px; text-transform: uppercase; letter-spacing: .1em; border-top: 1px solid var(--line-soft); }
+.subhead:first-of-type { border-top: 0; }
+.terminal-block { margin: 0; padding: 15px; background: #050b12; color: #b9d7f4; font: 10px/1.55 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; white-space: pre-wrap; overflow: auto; max-height: 330px; }
+.terminal-block.logs { min-height: 380px; max-height: 620px; }
+.diagnostics-view .safety-note { align-items: center; }
+.diagnostics-view .safety-note > div { flex: 1; }
+.diagnostics-view .card > .filter-tabs { padding-right: 10px; }
+
+@media (max-width: 720px) {
+  .diagnostics-view .safety-note { align-items: flex-start; flex-wrap: wrap; }
+  .terminal-block.logs { min-height: 260px; }
+}

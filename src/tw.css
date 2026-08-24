@@ -1,0 +1,39 @@
+/* Tailwind v4 — utilities + theme only (NO preflight) so the existing
+   custom CSS design stays intact. A tiny base shim restores the border
+   defaults that Tailwind's `border` utilities rely on. */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+/* shadcn-style tokens mapped to our palette (theme-aware via --line etc.) */
+@theme {
+  --color-background: var(--bg);
+  --color-foreground: var(--ink);
+  --color-card: var(--panel-solid);
+  --color-card-foreground: var(--ink);
+  --color-popover: var(--panel-solid);
+  --color-popover-foreground: var(--ink);
+  --color-primary: var(--accent);
+  --color-primary-foreground: var(--accent-ink);
+  --color-secondary: var(--button);
+  --color-secondary-foreground: var(--ink);
+  --color-muted: var(--elevated);
+  --color-muted-foreground: var(--muted);
+  --color-accent: var(--button);
+  --color-accent-foreground: var(--ink);
+  --color-destructive: var(--red);
+  --color-border: var(--line);
+  --color-input: var(--line-strong);
+  --color-ring: var(--accent);
+
+  --radius-4xl: 2rem;
+}
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-width: 0;
+    border-style: solid;
+  }
+}

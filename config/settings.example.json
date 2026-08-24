@@ -1,0 +1,19 @@
+{
+  "server": { "host": "127.0.0.1", "port": 8513, "pollIntervalMs": 10000 },
+  "connection": {
+    "gateway": { "host": "192.168.1.1", "port": 22, "user": "root", "password": "", "privateKeyPath": "", "hostFingerprint": "" },
+    "modem": { "host": "", "port": 22, "user": "", "password": "", "privateKeyPath": "", "hostFingerprint": "", "authMode": "unifi" }
+  },
+  "auth": { "enabled": true, "adminHash": "", "viewerHash": "", "viewerEnabled": false, "seededDefault": true },
+  "retention": { "metricsDays": 30, "eventsDays": 90, "auditDays": 180, "maxMetrics": 200000 },
+  "automation": { "enabled": true, "rules": [] },
+  "notifications": {
+    "enabled": false,
+    "incomingSms": true,
+    "connectionLost": true,
+    "ntfy": { "enabled": false, "url": "https://ntfy.sh", "topic": "" },
+    "telegram": { "enabled": false, "botToken": "", "chatId": "" },
+    "email": { "enabled": false, "host": "", "port": 587, "secure": false, "user": "", "password": "", "from": "", "to": "" }
+  },
+  "mqtt": { "enabled": false, "url": "mqtt://127.0.0.1:1883", "username": "", "password": "", "baseTopic": "unifi/u5g", "homeAssistantDiscovery": false, "discoveryPrefix": "homeassistant" }
+}
