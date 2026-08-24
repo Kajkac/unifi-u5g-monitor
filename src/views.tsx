@@ -90,6 +90,8 @@ export function DiagnosticsView({ notify }: Common) {
   const [busy, setBusy] = useState(false)
   const [log, setLog] = useState<keyof Diagnostics['logs']>('modem')
   async function load() { setBusy(true); try { setData(await api<Diagnostics>('/api/diagnostics/live')) } catch (error) { notify('danger', error instanceof Error ? error.message : String(error)) } finally { setBusy(false) } }
+  // Load once on mount only — diagnostics pulls a live mca-dump over SSH, so it must not re-run on every parent re-render (e.g. each websocket poll tick).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { void load() }, [])
   return <div className="view diagnostics-view">
     <section className="safety-note"><ShieldCheck size={18} /><div><strong>Read-only and redacted</strong><span>IMEI, ICCID, EID, APN credentials, usernames, passwords, tokens and long SIM identifiers are masked before reaching the browser.</span></div><button className="btn" onClick={load} disabled={busy}><RefreshCw size={15} className={busy ? 'spin' : ''} /> Refresh</button></section>
