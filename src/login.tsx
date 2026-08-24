@@ -30,11 +30,11 @@ export function Login({ seededDefault, onSuccess }: { seededDefault?: boolean; o
       <div className="login-logo"><RadioTower size={30} /></div>
       <span className="eyebrow">Local operations console</span>
       <h1>UniFi U5G Monitor</h1>
-      <p>Prijavi se za pristup modemu, SMS porukama i automatizacijama.</p>
+      <p>Sign in to access the modem, SMS messages and automations.</p>
       <label className="input-with-icon"><LockKeyhole size={16} /><input autoFocus type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" /></label>
       {error && <div className="notice danger">{error}</div>}
       <button className="btn primary" disabled={busy || !password}>{busy ? 'Signing in…' : 'Sign in'}</button>
-      {seededDefault && <small>Početna lozinka je <code>admin</code>. Promijeni je u Settings.</small>}
+      {seededDefault && <small>Default password is <code>admin</code>. Change it in Settings.</small>}
     </form>
   </main>
 }
