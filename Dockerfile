@@ -25,4 +25,7 @@ COPY config/settings.example.json ./config/settings.example.json
 EXPOSE 8513
 VOLUME ["/app/config", "/app/data"]
 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:8513/api/version').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
 CMD ["node_modules/.bin/tsx", "server/index.ts"]

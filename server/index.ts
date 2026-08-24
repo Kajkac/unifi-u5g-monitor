@@ -7,7 +7,7 @@ import { randomBytes } from "node:crypto";
 import { z } from "zod";
 import { config, publicConfig, rootDir, saveConfig, setPassword, verifyPassword } from "./config.js";
 import {
-  automationStats, cleanup, compact, createOutgoing, databaseStats, deleteSms, deleteTemplate, emitEvent as persistEvent, finishAttempt,
+  automationStats, cleanup, compact, createOutgoing, databaseStats, deleteSms, deleteTemplate, emitEvent as persistEvent, exportMetrics, exportSms, finishAttempt,
   history, listEvents, listSms, listTemplates, markSms, recordMetric, saveTemplate, smsCounts, startAttempt, storeIncoming, updateOutgoing,
 } from "./database.js";
 import { collectU5gStatus, diagnostics, readModemSms, sendModemSms, testConnection } from "./u5g.js";
@@ -28,6 +28,18 @@ function broadcast(payload: unknown) {
   for (const socket of sockets) {
     try { socket.send(data); } catch { sockets.delete(socket); }
   }
+}
+
+function csvCell(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  const text = String(value);
+  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+function toCsv(rows: Array<Record<string, unknown>>, columns: string[]): string {
+  const lines = [columns.join(",")];
+  for (const row of rows) lines.push(columns.map((col) => csvCell(row[col])).join(","));
+  return lines.join("\n");
 }
 
 function emitEvent(event: AppEvent) {
@@ -181,6 +193,19 @@ app.put("/api/sms/templates", async (request, reply) => {
   return saveTemplate(parsed.data);
 });
 app.delete("/api/sms/templates/:id", async (request) => { deleteTemplate((request.params as { id: string }).id); return { ok: true }; });
+
+app.get("/api/export/sms.csv", async (_request, reply) => {
+  const csv = toCsv(exportSms() as unknown as Array<Record<string, unknown>>, ["id", "direction", "peer", "text", "timestamp", "status", "read", "source", "error"]);
+  reply.header("content-type", "text/csv; charset=utf-8").header("content-disposition", 'attachment; filename="u5g-sms.csv"');
+  return csv;
+});
+
+app.get("/api/export/metrics.csv", async (request, reply) => {
+  const minutes = Math.min(43200, Math.max(5, Number((request.query as { minutes?: string }).minutes ?? 1440) || 1440));
+  const csv = toCsv(exportMetrics(minutes), ["ts", "connected", "lteRsrp", "lteRsrq", "lteSnr", "nrRsrp", "nrRsrq", "nrSnr", "signalPercent", "rxBytes", "txBytes", "cellId", "pci", "band"]);
+  reply.header("content-type", "text/csv; charset=utf-8").header("content-disposition", 'attachment; filename="u5g-metrics.csv"');
+  return csv;
+});
 
 app.get("/api/automation", async () => ({ enabled: config.automation.enabled, rules: config.automation.rules.map((rule) => ({ ...rule, dryRun: dryRun(rule) })), stats: automationStats(), catalog: {
   triggers: [{ id: "incoming_sms", label: "Incoming SMS" }, { id: "scheduled", label: "Daily schedule" }],

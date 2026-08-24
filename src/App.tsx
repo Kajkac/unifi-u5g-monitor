@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { Activity, Antenna, ArrowDownUp, Bot, Clock3, Database, Gauge, Languages, MessageSquare, Moon, RadioTower, RefreshCw, Settings, Signal, Sun, Terminal } from 'lucide-react'
+import { Activity, Antenna, ArrowDownUp, Bot, Clock3, Database, Gauge, MessageSquare, Moon, RadioTower, RefreshCw, Settings, Signal, Sun, Terminal } from 'lucide-react'
 import { api, formatRelative, type EventRow, type Status, type TabId, type TrendPoint, useNow } from './lib'
 import { Login, useAuth } from './login'
 import { OverviewView, SignalView, DataView, SystemView, DiagnosticsView, MqttView } from './views'
@@ -103,13 +103,13 @@ export default function App() {
   return <div className="shell">
     <aside className="sidebar">
       <div className="brand"><div className="brand-mark"><Antenna size={24} /></div><div><strong>UniFi U5G Monitor</strong><span>SMS & cellular operations</span></div></div>
-      <div className={`connection-card ${status?.connected ? 'ok' : 'danger'}`}><i /><div><span>U5G Max Outdoor</span><strong>{status?.connected ? 'Connected' : 'Offline'}</strong></div></div>
+      <div className={`connection-card ${status?.connected ? 'ok' : 'danger'}`}><i /><div><span>{status?.device?.modelDisplay || status?.device?.model || 'UniFi U5G'}</span><strong>{status?.connected ? 'Connected' : 'Offline'}</strong></div></div>
       <nav className="nav">{groups.map((group) => <section key={group}><span className="nav-title">{group}</span>{nav.filter((item) => item.group === group).map((item) => <button key={item.id} className={tab === item.id ? 'active' : ''} onClick={() => setTab(item.id)}>{item.icon}<span>{item.label}</span>{item.id === 'sms' && Boolean(status?.sms?.unread) && <b>{status?.sms?.unread}</b>}</button>)}</section>)}</nav>
       <div className="sidebar-facts"><span>Gateway<strong>{status?.connection.gatewayHost || '—'}</strong></span><span>Modem<strong>{status?.connection.modemHost || '—'}</strong></span><span>Operator<strong>{status?.radio?.operator || '—'}</strong></span></div>
     </aside>
     <main className="main">
       {viewer && <div className="viewer-banner">Read-only viewer session</div>}
-      <header className="topbar"><div><span className="eyebrow">U5G operations console</span><h1>{title}</h1></div><div className="top-actions"><span className={`live ${live ? 'on' : ''}`}><i />{live ? 'live' : 'reconnecting'}</span><span className="updated">{formatRelative(status?.checkedAt, now)}</span><button className="icon-btn" onClick={refresh} disabled={busy || viewer} title="Refresh"><RefreshCw className={busy ? 'spin' : ''} size={18} /></button><button className="icon-btn" title="Language"><Languages size={18} /></button><button className="icon-btn" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} title="Theme">{theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}</button></div></header>
+      <header className="topbar"><div><span className="eyebrow">U5G operations console</span><h1>{title}</h1></div><div className="top-actions"><span className={`live ${live ? 'on' : ''}`}><i />{live ? 'live' : 'reconnecting'}</span><span className="updated">{formatRelative(status?.checkedAt, now)}</span><button className="icon-btn" onClick={refresh} disabled={busy || viewer} title="Refresh"><RefreshCw className={busy ? 'spin' : ''} size={18} /></button><button className="icon-btn" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} title="Theme">{theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}</button></div></header>
       {!status?.connected && <div className="offline-banner"><Antenna size={18} /><div><strong>U5G is not connected</strong><span>{status?.connectionError || 'Configure the UCG SSH connection in Settings.'}</span></div></div>}
       <div className="content">{view}</div>
     </main>

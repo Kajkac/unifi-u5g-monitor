@@ -111,6 +111,11 @@ export function listSms(folder: string, limit = 100, offset = 0): { messages: Sm
   return { messages: rows.map((row) => ({ ...row, read: Boolean(row.isRead) } as unknown as SmsMessage)), total };
 }
 
+export function exportSms(): SmsMessage[] {
+  const rows = db.prepare("SELECT id,direction,peer,text,timestamp,status,is_read AS isRead,source,error FROM sms_messages ORDER BY timestamp ASC").all() as Array<Record<string, unknown>>;
+  return rows.map((row) => ({ ...row, read: Boolean(row.isRead) } as unknown as SmsMessage));
+}
+
 export function markSms(id: string, read: boolean) {
   db.prepare("UPDATE sms_messages SET is_read=? WHERE id=?").run(read ? 1 : 0, id);
 }
@@ -141,6 +146,16 @@ export function history(minutes: number) {
   const rows = db.prepare("SELECT * FROM metrics WHERE ts>=? ORDER BY id").all(since) as Array<Record<string, unknown>>;
   const step = Math.max(1, Math.floor(rows.length / 240));
   return rows.filter((_, i) => i % step === 0).map((r) => ({
+    ts: r.ts, connected: Boolean(r.connected), lteRsrp: r.lte_rsrp, lteRsrq: r.lte_rsrq, lteSnr: r.lte_snr,
+    nrRsrp: r.nr_rsrp, nrRsrq: r.nr_rsrq, nrSnr: r.nr_snr, signalPercent: r.signal_percent,
+    rxBytes: r.rx_bytes, txBytes: r.tx_bytes, cellId: r.cell_id, pci: r.pci, band: r.band,
+  }));
+}
+
+export function exportMetrics(minutes: number) {
+  const since = new Date(Date.now() - minutes * 60000).toISOString();
+  const rows = db.prepare("SELECT ts,connected,lte_rsrp,lte_rsrq,lte_snr,nr_rsrp,nr_rsrq,nr_snr,signal_percent,rx_bytes,tx_bytes,cell_id,pci,band FROM metrics WHERE ts>=? ORDER BY id").all(since) as Array<Record<string, unknown>>;
+  return rows.map((r) => ({
     ts: r.ts, connected: Boolean(r.connected), lteRsrp: r.lte_rsrp, lteRsrq: r.lte_rsrq, lteSnr: r.lte_snr,
     nrRsrp: r.nr_rsrp, nrRsrq: r.nr_rsrq, nrSnr: r.nr_snr, signalPercent: r.signal_percent,
     rxBytes: r.rx_bytes, txBytes: r.tx_bytes, cellId: r.cell_id, pci: r.pci, band: r.band,
