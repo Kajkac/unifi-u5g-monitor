@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { Activity, Antenna, ArrowDownUp, Bot, Clock3, Database, Gauge, MessageSquare, Moon, RadioTower, RefreshCw, Settings, Signal, Sun, Terminal } from 'lucide-react'
+import { Activity, Antenna, ArrowDownUp, Bot, Clock3, Command, Database, Gauge, MessageSquare, Moon, RadioTower, RefreshCw, Settings, Signal, Sun, Terminal } from 'lucide-react'
 import { api, formatRelative, type EventRow, type Status, type TabId, type TrendPoint, useNow } from './lib'
 import { Login, useAuth } from './login'
 import { OverviewView, SignalView, DataView, SystemView, DiagnosticsView, MqttView } from './views'
@@ -38,13 +38,19 @@ export default function App() {
   const [live, setLive] = useState(false)
   const [busy, setBusy] = useState(false)
   const [theme, setTheme] = useState(() => localStorage.getItem('u5g-theme') || 'dark')
-  const [toast, setToast] = useState<{ tone: string; text: string } | null>(null)
+  const [toasts, setToasts] = useState<Array<{ id: number; tone: string; text: string }>>([])
+  const [paletteOpen, setPaletteOpen] = useState(false)
   const socketRef = useRef<WebSocket | null>(null)
+  const toastId = useRef(0)
   const now = useNow()
   const viewer = auth.auth?.role === 'viewer'
 
   function setTab(next: TabId) { location.hash = next; setTabState(next) }
-  function notify(tone: string, text: string) { setToast({ tone, text }); setTimeout(() => setToast(null), 5000) }
+  function notify(tone: string, text: string) {
+    const id = ++toastId.current
+    setToasts((current) => [...current.slice(-3), { id, tone, text }])
+    setTimeout(() => setToasts((current) => current.filter((item) => item.id !== id)), 5000)
+  }
   async function reload() {
     const [next, trend, feed] = await Promise.all([api<Status>('/api/status'), api<TrendPoint[]>('/api/history?minutes=1440'), api<EventRow[]>('/api/events?limit=100')])
     setStatus(next); setHistory(trend); setEvents(feed)
@@ -81,6 +87,11 @@ export default function App() {
 
   useEffect(() => { document.documentElement.dataset.theme = theme; localStorage.setItem('u5g-theme', theme) }, [theme])
   useEffect(() => { const fn = () => setTabState(hashTab()); window.addEventListener('hashchange', fn); return () => window.removeEventListener('hashchange', fn) }, [])
+  useEffect(() => {
+    const fn = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); setPaletteOpen((v) => !v) } }
+    window.addEventListener('keydown', fn)
+    return () => window.removeEventListener('keydown', fn)
+  }, [])
   const title = nav.find((item) => item.id === tab)?.label || 'Overview'
   const view = (() => {
     const common = { status, history, events, viewer, onRefresh: refresh, notify }
@@ -109,11 +120,42 @@ export default function App() {
     </aside>
     <main className="main">
       {viewer && <div className="viewer-banner">Read-only viewer session</div>}
-      <header className="topbar"><div><span className="eyebrow">U5G operations console</span><h1>{title}</h1></div><div className="top-actions"><span className={`live ${live ? 'on' : ''}`}><i />{live ? 'live' : 'reconnecting'}</span><span className="updated">{formatRelative(status?.checkedAt, now)}</span><button className="icon-btn" onClick={refresh} disabled={busy || viewer} title="Refresh"><RefreshCw className={busy ? 'spin' : ''} size={18} /></button><button className="icon-btn" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} title="Theme">{theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}</button></div></header>
+      <header className="topbar"><div><span className="eyebrow">U5G operations console</span><h1>{title}</h1></div><div className="top-actions"><span className={`live ${live ? 'on' : ''}`}><i />{live ? 'live' : 'reconnecting'}</span><span className="updated">{formatRelative(status?.checkedAt, now)}</span><button className="icon-btn" onClick={() => setPaletteOpen(true)} title="Command palette (⌘K)"><Command size={18} /></button><button className="icon-btn" onClick={refresh} disabled={busy || viewer} title="Refresh"><RefreshCw className={busy ? 'spin' : ''} size={18} /></button><button className="icon-btn" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} title="Theme">{theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}</button></div></header>
       {!status?.connected && <div className="offline-banner"><Antenna size={18} /><div><strong>U5G is not connected</strong><span>{status?.connectionError || 'Configure the UCG SSH connection in Settings.'}</span></div></div>}
       <div className="content">{view}</div>
     </main>
     <nav className="mobile-nav">{nav.slice(0, 5).map((item) => <button key={item.id} className={tab === item.id ? 'active' : ''} onClick={() => setTab(item.id)}>{item.icon}<span>{item.label}</span></button>)}</nav>
-    {toast && <div className={`toast ${toast.tone}`}>{toast.text}</div>}
+    <div className="toast-stack">{toasts.map((item) => <div key={item.id} className={`toast ${item.tone}`}>{item.text}</div>)}</div>
+    {paletteOpen && <CommandPalette nav={nav} onNavigate={(id) => { setTab(id); setPaletteOpen(false) }} onClose={() => setPaletteOpen(false)} onRefresh={refresh} onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')} />}
+  </div>
+}
+
+function CommandPalette({ nav, onNavigate, onClose, onRefresh, onToggleTheme }: { nav: Array<{ id: TabId; label: string; icon: ReactNode; group: string }>; onNavigate: (id: TabId) => void; onClose: () => void; onRefresh: () => void; onToggleTheme: () => void }) {
+  const [query, setQuery] = useState('')
+  const [selected, setSelected] = useState(0)
+  const actions = [
+    { key: 'refresh', label: 'Refresh status', icon: <RefreshCw size={16} />, run: onRefresh },
+    { key: 'theme', label: 'Toggle theme', icon: <Sun size={16} />, run: onToggleTheme },
+    ...nav.map((item) => ({ key: item.id, label: `Go to ${item.label}`, icon: item.icon, run: () => onNavigate(item.id) })),
+  ]
+  const filtered = actions.filter((item) => item.label.toLowerCase().includes(query.toLowerCase()))
+  function run(index: number) { const item = filtered[index]; if (item) { item.run(); onClose() } }
+  return <div className="modal-backdrop" onClick={onClose}>
+    <section className="command-palette" onClick={(e) => e.stopPropagation()}>
+      <input
+        autoFocus className="input" placeholder="Type a command or search…" value={query}
+        onChange={(e) => { setQuery(e.target.value); setSelected(0) }}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') onClose()
+          else if (e.key === 'ArrowDown') { e.preventDefault(); setSelected((i) => Math.min(i + 1, filtered.length - 1)) }
+          else if (e.key === 'ArrowUp') { e.preventDefault(); setSelected((i) => Math.max(i - 1, 0)) }
+          else if (e.key === 'Enter') { e.preventDefault(); run(selected) }
+        }}
+      />
+      <div className="palette-list">
+        {filtered.map((item, index) => <button key={item.key} className={index === selected ? 'active' : ''} onMouseEnter={() => setSelected(index)} onClick={() => run(index)}>{item.icon}<span>{item.label}</span></button>)}
+        {filtered.length === 0 && <div className="empty">No matching commands</div>}
+      </div>
+    </section>
   </div>
 }
