@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1 — 2026-08-24
+
+- Fixed the "Update now" result showing as a duplicate toast (once from the direct response, once from the broadcast event).
+
 ## 0.2.0 — 2026-08-24
 
 - Added a first-run setup wizard (gateway host, SSH password, admin password) shown instead of the login screen until configured.

@@ -325,7 +325,7 @@ app.post("/api/updates/check", async () => {
 });
 app.post("/api/updates/apply", async () => {
   const result = await applyUpdate();
-  emitEvent({ ts: new Date().toISOString(), level: result.ok ? "action" : "error", kind: "update", message: result.message });
+  emitEvent({ ts: new Date().toISOString(), level: "info", kind: "update", message: result.message });
   if (result.ok) setTimeout(() => process.exit(0), 500);
   return result;
 });
