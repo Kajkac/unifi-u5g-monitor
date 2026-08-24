@@ -14,6 +14,7 @@ import { collectU5gStatus, diagnostics, readModemSms, sendModemSms, testConnecti
 import { applyMqtt, mqttState, publishDiscovery, publishSms, publishStatus } from "./mqtt.js";
 import { notify } from "./notifications.js";
 import { dryRun, evaluateIncomingSms, runRuleNow, runScheduled } from "./automations.js";
+import { applyUpdate, checkForUpdate, getChangelog, getUpdateState } from "./updates.js";
 import type { AppEvent, AutomationRule, U5gStatus } from "./types.js";
 
 const startedAt = Date.now();
@@ -315,6 +316,21 @@ app.get("/api/version", async () => {
   return { name: pkg.name, version: pkg.version, node: process.version, startedAt: new Date(startedAt).toISOString(), uptimeSeconds: Math.floor((Date.now() - startedAt) / 1000) };
 });
 
+app.get("/api/updates", async () => getUpdateState());
+app.post("/api/updates/check", async () => {
+  const wasAvailable = getUpdateState().updateAvailable;
+  const next = await checkForUpdate();
+  if (next.updateAvailable && !wasAvailable) emitEvent({ ts: new Date().toISOString(), level: "warn", kind: "update", message: `Update available: v${next.latestVersion}` });
+  return next;
+});
+app.post("/api/updates/apply", async () => {
+  const result = await applyUpdate();
+  emitEvent({ ts: new Date().toISOString(), level: result.ok ? "action" : "error", kind: "update", message: result.message });
+  if (result.ok) setTimeout(() => process.exit(0), 500);
+  return result;
+});
+app.get("/api/changelog", async () => ({ markdown: getChangelog() }));
+
 app.get("/ws", { websocket: true }, (socket) => {
   sockets.add(socket);
   if (currentStatus) socket.send(JSON.stringify({ type: "status", status: currentStatus }));
@@ -333,6 +349,13 @@ await poll();
 setInterval(() => void poll(), config.server.pollIntervalMs);
 setInterval(() => void runScheduled(automationActions), 30000);
 setInterval(cleanup, 6 * 3600000);
+setTimeout(() => void checkForUpdate(), 10000);
+setInterval(() => {
+  const wasAvailable = getUpdateState().updateAvailable;
+  void checkForUpdate().then((next) => {
+    if (next.updateAvailable && !wasAvailable) emitEvent({ ts: new Date().toISOString(), level: "warn", kind: "update", message: `Update available: v${next.latestVersion}` });
+  });
+}, 24 * 3600000);
 
 await app.listen({ host: config.server.host, port: config.server.port });
 console.log(`UniFi U5G Monitor listening on http://${config.server.host}:${config.server.port}`);

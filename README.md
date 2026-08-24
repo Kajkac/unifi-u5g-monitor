@@ -33,6 +33,7 @@ This is not affiliated with or endorsed by Ubiquiti/UniFi. It talks to your own 
 - Timeline / measurement history, MQTT, and Home Assistant discovery
 - ntfy, Telegram, and email notifications
 - Admin/viewer login and a redacted backup export (no secrets included)
+- Built-in update checker (Settings > About): periodic + manual check against GitHub, changelog view, one-click update on git-based installs
 
 ## Architecture
 
