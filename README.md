@@ -58,7 +58,7 @@ Browser -> local app :8513
 ## Quick start (all platforms)
 
 ```bash
-git clone https://github.com/<your-username>/unifi-u5g-monitor.git
+git clone https://github.com/Kajkac/unifi-u5g-monitor.git
 cd unifi-u5g-monitor
 npm install
 npm run build
@@ -120,7 +120,7 @@ npm run service:uninstall
 The app also ships a `Dockerfile` and `docker-compose.yml` — this is the easiest way to run it if you don't want a local Node.js setup.
 
 ```bash
-git clone https://github.com/<your-username>/unifi-u5g-monitor.git
+git clone https://github.com/Kajkac/unifi-u5g-monitor.git
 cd unifi-u5g-monitor
 docker compose up -d --build
 ```
