@@ -1,5 +1,8 @@
 # UniFi U5G Monitor
 
+[![CI](https://github.com/Kajkac/unifi-u5g-monitor/actions/workflows/ci.yml/badge.svg)](https://github.com/Kajkac/unifi-u5g-monitor/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 A private, self-hosted dashboard for the UniFi U5G family of mobile gateways (U5G, U5G Max, U5G Max Outdoor). It reaches the modem through the UniFi gateway as an SSH jump host, reads real device state via `mca-dump`, and uses the U5G's built-in `read-sms` / `send-sms` commands — features the stock UniFi web UI doesn't expose.
 
 This is not affiliated with or endorsed by Ubiquiti/UniFi. It talks to your own hardware over SSH on your own network.
