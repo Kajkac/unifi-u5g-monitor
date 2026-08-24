@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { Activity, Antenna, ArrowDownUp, Bot, Clock3, Command, Database, Gauge, MessageSquare, Moon, RadioTower, RefreshCw, Settings, Signal, Sun, Terminal } from 'lucide-react'
+import { Activity, Antenna, ArrowDownUp, Bot, Clock3, Command, Database, Gauge, LogOut, MessageSquare, Moon, RadioTower, RefreshCw, Settings, Signal, Sun, Terminal } from 'lucide-react'
+import { UNIFI_LOGO } from './brand'
 import { api, formatRelative, type EventRow, type Status, type TabId, type TrendPoint, useNow } from './lib'
 import { Login, useAuth } from './login'
 import { Setup } from './setup'
@@ -62,6 +63,7 @@ export default function App() {
     try { setStatus(await api<Status>('/api/actions/refresh', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' })); await reload() }
     catch (error) { notify('danger', error instanceof Error ? error.message : String(error)) } finally { setBusy(false) }
   }
+  async function logout() { await api('/api/logout', { method: 'POST' }).catch(() => undefined); await auth.refresh() }
 
   useEffect(() => {
     if (auth.needsLogin || !authenticated) return
@@ -116,10 +118,11 @@ export default function App() {
   const groups = [...new Set(nav.map((item) => item.group))]
   return <div className="shell">
     <aside className="sidebar">
-      <div className="brand"><div className="brand-mark"><Antenna size={24} /></div><div><strong>UniFi U5G Monitor</strong><span>SMS & cellular operations</span></div></div>
+      <div className="brand"><div className="brand-mark"><img src={UNIFI_LOGO} alt="UniFi" /></div><div><strong>UniFi U5G Monitor</strong><span>SMS & cellular operations</span></div></div>
       <div className={`connection-card ${status?.connected ? 'ok' : 'danger'}`}><i /><div><span>{status?.device?.modelDisplay || status?.device?.model || 'UniFi U5G'}</span><strong>{status?.connected ? 'Connected' : 'Offline'}</strong></div></div>
       <nav className="nav">{groups.map((group) => <section key={group}><span className="nav-title">{group}</span>{nav.filter((item) => item.group === group).map((item) => <button key={item.id} className={tab === item.id ? 'active' : ''} onClick={() => setTab(item.id)}>{item.icon}<span>{item.label}</span>{item.id === 'sms' && Boolean(status?.sms?.unread) && <b>{status?.sms?.unread}</b>}</button>)}</section>)}</nav>
       <div className="sidebar-facts"><span>Gateway<strong>{status?.connection.gatewayHost || '—'}</strong></span><span>Modem<strong>{status?.connection.modemHost || '—'}</strong></span><span>Operator<strong>{status?.radio?.operator || '—'}</strong></span></div>
+      <button className="logout-btn" onClick={logout}><LogOut size={15} /> Log out</button>
     </aside>
     <main className="main">
       {viewer && <div className="viewer-banner">Read-only viewer session</div>}

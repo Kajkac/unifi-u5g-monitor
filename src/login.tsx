@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { LockKeyhole, RadioTower } from 'lucide-react'
+import { LockKeyhole } from 'lucide-react'
 import { api, type AuthState } from './lib'
+import { UNIFI_LOGO } from './brand'
 
 export function useAuth() {
   const [auth, setAuth] = useState<AuthState | null>(null)
@@ -27,7 +28,7 @@ export function Login({ seededDefault, onSuccess }: { seededDefault?: boolean; o
   }
   return <main className="login-screen">
     <form className="login-card" onSubmit={submit}>
-      <div className="login-logo"><RadioTower size={30} /></div>
+      <div className="login-logo"><img src={UNIFI_LOGO} alt="UniFi" /></div>
       <span className="eyebrow">Local operations console</span>
       <h1>UniFi U5G Monitor</h1>
       <p>Sign in to access the modem, SMS messages and automations.</p>

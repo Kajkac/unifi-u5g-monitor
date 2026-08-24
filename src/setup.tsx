@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { KeyRound, LockKeyhole, RadioTower, Server } from 'lucide-react'
+import { KeyRound, LockKeyhole, Server } from 'lucide-react'
 import { api } from './lib'
+import { UNIFI_LOGO } from './brand'
 
 export function Setup({ onSuccess, onSkip }: { onSuccess: () => void; onSkip: () => void }) {
   const [gatewayHost, setGatewayHost] = useState('')
@@ -25,7 +26,7 @@ export function Setup({ onSuccess, onSkip }: { onSuccess: () => void; onSkip: ()
 
   return <main className="login-screen">
     <form className="login-card setup-card" onSubmit={submit}>
-      <div className="login-logo"><RadioTower size={30} /></div>
+      <div className="login-logo"><img src={UNIFI_LOGO} alt="UniFi" /></div>
       <span className="eyebrow">First-time setup</span>
       <h1>UniFi U5G Monitor</h1>
       <p>Connect your UniFi gateway and set an admin password to get started.</p>
