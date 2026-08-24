@@ -16,6 +16,19 @@ config/settings.json
 config/*.key
 config/*.pem
 
+# AI assistant helper/config files
+AGENTS.md
+PLAN.md
+QUERIES.md
+CLAUDE.md
+.claude/
+.cursor/
+.cursorrules
+.windsurfrules
+.windsurf/
+.github/copilot-instructions.md
+.aider*
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
