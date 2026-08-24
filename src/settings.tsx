@@ -60,7 +60,7 @@ export function SettingsView({ viewer, notify, onSaved }: { viewer: boolean; not
         <div className="button-row">
           <button className="btn" disabled={checking} onClick={checkUpdates}><RefreshCw size={15} className={checking ? 'spin' : ''} /> Check for updates</button>
           {updates?.updateAvailable && <button className="btn primary" disabled={viewer || updating} onClick={applyUpdate}>{updating ? 'Updating…' : 'Update now'}</button>}
-          <a className="text-btn" href={`https://github.com/Kajkac/unifi-u5g-monitor/releases`} target="_blank" rel="noreferrer">View on GitHub</a>
+          <a className="text-btn" href={updates?.releaseUrl || 'https://github.com/Kajkac/unifi-u5g-monitor/releases'} target="_blank" rel="noreferrer">View on GitHub</a>
         </div>
         {updates?.updateAvailable && !updates?.canSelfUpdate && <p className="panel-note">No local git checkout detected (Docker image). Update on the host: <code>git pull && docker compose up -d --build</code></p>}
       </Panel>

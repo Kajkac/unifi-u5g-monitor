@@ -18,6 +18,7 @@ type UpdateState = {
   checkedAt?: string;
   error?: string;
   canSelfUpdate: boolean;
+  releaseUrl?: string;
 };
 
 let state: UpdateState = { currentVersion, updateAvailable: false, canSelfUpdate };
@@ -36,16 +37,34 @@ export function getUpdateState(): UpdateState {
   return state;
 }
 
+async function latestFromReleases(): Promise<{ version: string; url: string } | null> {
+  const response = await fetch(`https://api.github.com/repos/${REPO}/releases/latest`, {
+    signal: AbortSignal.timeout(8000),
+    headers: { accept: "application/vnd.github+json" },
+  });
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const release = (await response.json()) as { tag_name?: string; html_url?: string };
+  const version = String(release.tag_name || "").replace(/^v/i, "");
+  return version ? { version, url: release.html_url || `https://github.com/${REPO}/releases` } : null;
+}
+
+async function latestFromPackageJson(): Promise<{ version: string; url: string } | null> {
+  const response = await fetch(`https://raw.githubusercontent.com/${REPO}/master/package.json`, { signal: AbortSignal.timeout(8000) });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const remote = (await response.json()) as { version?: string };
+  const version = String(remote.version || "");
+  return version ? { version, url: `https://github.com/${REPO}` } : null;
+}
+
 export async function checkForUpdate(): Promise<UpdateState> {
   try {
-    const response = await fetch(`https://raw.githubusercontent.com/${REPO}/master/package.json`, { signal: AbortSignal.timeout(8000) });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const remote = (await response.json()) as { version?: string };
-    const latestVersion = String(remote.version || "");
+    const latest = (await latestFromReleases()) ?? (await latestFromPackageJson());
     state = {
       ...state,
-      latestVersion: latestVersion || undefined,
-      updateAvailable: latestVersion ? isNewer(latestVersion, currentVersion) : false,
+      latestVersion: latest?.version,
+      updateAvailable: latest ? isNewer(latest.version, currentVersion) : false,
+      releaseUrl: latest?.url,
       checkedAt: new Date().toISOString(),
       error: undefined,
     };

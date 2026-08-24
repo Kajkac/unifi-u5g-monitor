@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 — 2026-08-24
 
 - Added a first-run setup wizard (gateway host, SSH password, admin password) shown instead of the login screen until configured.
 - Added Docker support (`Dockerfile`, `docker-compose.yml`, container healthcheck).
@@ -8,10 +8,12 @@
 - Added CSV export for SMS history and signal metrics.
 - Added an in-app update checker with a manual "Update now" action and this changelog panel under Settings > About.
 - Added a command palette (Ctrl/Cmd+K) for quick navigation and actions.
+- Added UniFi branding (logo, device photo, favicon) and a logout button.
 - Toast notifications now stack instead of replacing each other.
 - Richer empty states across SMS and Timeline views.
 - Fixed the device model label falling back to a hardcoded placeholder instead of the detected model.
 - Fixed a literal `\n` rendering in the Diagnostics view instead of a line break.
+- Fixed the setup screen card being clamped to the login card's narrower width.
 
 ## 0.1.0 — 2026-08-24
 
