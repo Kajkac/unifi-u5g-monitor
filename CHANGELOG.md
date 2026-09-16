@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.0 — 2026-09-16
+
+- Reworked SMS into a conversation/thread view: contacts are grouped into threads with chat bubbles, a per-thread unread/needs-attention filter, and an inline reply bar, instead of a flat message list.
+
 ## 0.3.0 — 2026-08-25
 
 - Added `scripts/auto-update-docker.sh` for opt-in automatic Docker updates via cron/systemd timer — checks the git remote, and only pulls + rebuilds when a new commit is actually available.

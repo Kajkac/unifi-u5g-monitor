@@ -102,7 +102,7 @@ export default function App() {
     if (tab === 'overview') return <OverviewView {...common} onNavigate={setTab} />
     if (tab === 'signal') return <SignalView {...common} />
     if (tab === 'data') return <DataView {...common} />
-    if (tab === 'sms') return <SmsView status={status} viewer={viewer} notify={notify} />
+    if (tab === 'sms') return <SmsView viewer={viewer} notify={notify} />
     if (tab === 'automations') return <AutomationsView viewer={viewer} notify={notify} />
     if (tab === 'timeline') return <TimelineView events={events} />
     if (tab === 'system') return <SystemView {...common} />
